@@ -32,4 +32,22 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// User schema custom method for generating OTP / verification code
+userSchema.methods.generateVerificationCode = function () {
+    function generateRandomFiveDigitNumber() {
+        const firstDigit = Math.floor(Math.random() * 9) + 1;
+        const remainDigit = Math.floor(Math.random() * 10000)
+            .toString() // Convert number to string
+            .padStart(4, 0); 
+
+        return parseInt(firstDigit + remainDigit);
+    }
+
+    const verificationCode = generateRandomFiveDigitNumber(); // Generate final verification code
+    this.verificationCode = verificationCode; // Save verification code in database
+    this.verificationCodeExpire = Date.now() + 5 * 60 * 1000; // Set OTP expire time (5 minutes)
+    return verificationCode;
+};
+
+
 export const User = mongoose.model("User",userSchema);
